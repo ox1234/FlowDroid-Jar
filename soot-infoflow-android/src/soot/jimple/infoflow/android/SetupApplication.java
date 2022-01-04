@@ -10,12 +10,34 @@
  ******************************************************************************/
 package soot.jimple.infoflow.android;
 
-import heros.solver.Pair;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.xml.stream.XMLStreamException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 import org.xmlpull.v1.XmlPullParserException;
-import soot.*;
+
+import heros.solver.Pair;
+import soot.G;
+import soot.Main;
+import soot.PackManager;
+import soot.Scene;
+import soot.SootClass;
+import soot.SootField;
+import soot.SootMethod;
+import soot.Unit;
 import soot.jimple.Stmt;
 import soot.jimple.infoflow.AbstractInfoflow;
 import soot.jimple.infoflow.IInfoflow;
@@ -85,11 +107,6 @@ import soot.jimple.infoflow.values.IValueProvider;
 import soot.options.Options;
 import soot.util.HashMultiMap;
 import soot.util.MultiMap;
-
-import javax.xml.stream.XMLStreamException;
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
 
 public class SetupApplication implements ITaintWrapperDataFlowAnalysis {
 
@@ -1039,7 +1056,7 @@ public class SetupApplication implements ITaintWrapperDataFlowAnalysis {
 	 * @param callbackClass The class with which to associate the layout callbacks
 	 * @param lc            The layout control whose callbacks are to be associated
 	 *                      with the given class
-	 * @return
+	 * @return 
 	 */
 	private boolean registerCallbackMethodsForView(SootClass callbackClass, AndroidLayoutControl lc) {
 		// Ignore system classes

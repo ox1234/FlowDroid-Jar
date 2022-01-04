@@ -9,6 +9,8 @@
  ******************************************************************************/
 package soot.jimple.infoflow;
 
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Collection;
@@ -97,6 +99,8 @@ import soot.jimple.infoflow.threading.DefaultExecutorFactory;
 import soot.jimple.infoflow.threading.IExecutorFactory;
 import soot.jimple.infoflow.util.SootMethodRepresentationParser;
 import soot.jimple.infoflow.util.SystemClassHandler;
+import soot.jimple.toolkits.callgraph.CallGraph;
+import soot.jimple.toolkits.callgraph.Edge;
 import soot.jimple.toolkits.callgraph.ReachableMethods;
 import soot.jimple.toolkits.pointer.DumbPointerAnalysis;
 import soot.options.Options;
@@ -336,6 +340,7 @@ public class Infoflow extends AbstractInfoflow {
 		}
 	}
 
+
 	private void runTaintAnalysis(final ISourceSinkManager sourcesSinks, final Set<String> additionalSeeds,
 			IInfoflowCFG iCfg, InfoflowPerformanceData performanceData) {
 		logger.info("Starting Taint Analysis");
@@ -455,9 +460,16 @@ public class Infoflow extends AbstractInfoflow {
 				int sinkCount = 0;
 				logger.info("Looking for sources and sinks...");
 
-				for (SootMethod sm : getMethodsForSeeds(iCfg))
-					sinkCount += scanMethodForSourcesSinks(sourcesSinks, forwardProblem, sm);
-
+				try {
+					OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream("call.txt"));
+					for (SootMethod sm : getMethodsForSeeds(iCfg)) {
+						writer.write(sm.getSignature() + "\n");
+						sinkCount += scanMethodForSourcesSinks(sourcesSinks, forwardProblem, sm);
+					}
+					writer.flush();
+				}catch (Exception e){
+					e.printStackTrace();
+				}
 				// We optionally also allow additional seeds to be specified
 				if (additionalSeeds != null)
 					for (String meth : additionalSeeds) {
