@@ -26,6 +26,7 @@ import soot.jimple.infoflow.taintWrappers.ITaintPropagationWrapper;
 import soot.jimple.infoflow.taintWrappers.ITaintWrapperDataFlowAnalysis;
 import soot.jimple.infoflow.taintWrappers.TaintWrapperSet;
 import soot.options.Options;
+import util.ClassHierarchyUtil;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
@@ -121,8 +122,6 @@ public class SetupJarApplication implements ITaintWrapperDataFlowAnalysis {
 
     public SetupJarApplication(InfoflowJarConfiguration config){
         this.config = config;
-        this.taintPropagationHandler = new MonitorTaintPropagationHandler();
-        this.taintWrapper = new TaintWrapperSet();
     }
 
     public InfoflowResults runInfoflow() throws IOException {
@@ -249,6 +248,7 @@ public class SetupJarApplication implements ITaintWrapperDataFlowAnalysis {
         Options.v().set_allow_phantom_refs(true);
         Options.v().set_whole_program(true);
         Options.v().set_process_dir(config.getJarFiles());
+        Options.v().set_prepend_classpath(true);
         Options.v().set_src_prec(Options.src_prec_class);
         Options.v().set_keep_offset(false);
         Options.v().set_keep_line_number(true);
@@ -264,7 +264,10 @@ public class SetupJarApplication implements ITaintWrapperDataFlowAnalysis {
         logger.info("Loading jar classes...");
         Scene.v().loadNecessaryClasses();
 
-        FastHierarchy fastHierarchy = Scene.v().getOrMakeFastHierarchy();
+        ClassHierarchyUtil classHierarchyUtil = new ClassHierarchyUtil();
+//        classHierarchyUtil.replaceSubClasses(
+//                "org.apache.logging.log4j.core.pattern.LogEventPatternConverter",
+//                Collections.singletonList("org.apache.logging.log4j.core.pattern.MessagePatternConverter"));
 
         PackManager.v().getPack("wjpp").apply();
     }
@@ -303,11 +306,21 @@ public class SetupJarApplication implements ITaintWrapperDataFlowAnalysis {
         }
         if (config.getEnableReflection())
             Options.v().setPhaseOption("cg", "types-for-invoke:true");
+        configureCustomCallGraph();
+    }
+
+    protected void configureCustomCallGraph(){
+//        Options.v().setPhaseOption("cg", "library:signature-resolution");
+//        Options.v().setPhaseOption("cg", "safe-newinstance:true");
+        Options.v().setPhaseOption("cg.spark", "field-based:true");
+        Options.v().setPhaseOption("cg.spark", "types-for-sites:true");
+        Options.v().setPhaseOption("cg.spark", "empties-as-allocs:true");
+        Options.v().setPhaseOption("cg.spark", "propagator:iter");
     }
 
     @Override
     public void setTaintWrapper(ITaintPropagationWrapper taintWrapper) {
-
+        this.taintWrapper = taintWrapper;
     }
 
     @Override

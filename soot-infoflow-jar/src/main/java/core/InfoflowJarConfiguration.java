@@ -1,6 +1,7 @@
 package core;
 
 import soot.jimple.infoflow.InfoflowConfiguration;
+import soot.jimple.infoflow.methodSummary.generator.SummaryGeneratorConfiguration;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -9,7 +10,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-public class InfoflowJarConfiguration extends InfoflowConfiguration {
+public class InfoflowJarConfiguration extends SummaryGeneratorConfiguration {
     private String jarDir;
     private List<String> jarFiles = new LinkedList<>();
     private String sourceSinkFile;
